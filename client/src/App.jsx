@@ -10,6 +10,9 @@ function App() {
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [todosPerPage, setTodosPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Runs an API action and shows its error in the banner if it fails
   const run = async (action) => {
@@ -21,7 +24,9 @@ function App() {
       setError(err.message);
     }
   };
-
+  useEffect(() => {
+  setCurrentPage(1);
+}, [search, filter]);
   useEffect(() => {
     run(async () => setTodos(await getTodos())).finally(() =>
       setLoading(false)
@@ -31,7 +36,9 @@ function App() {
   const handleAdd = (title) =>
     run(async () => {
       const newTodo = await createTodo(title);
+
       setTodos((prev) => [newTodo, ...prev]);
+      setCurrentPage(1);
     });
 
   const handleUpdate = (id, data) =>
@@ -58,8 +65,22 @@ function App() {
       setTodos((prev) => prev.filter((t) => !t.completed));
     });
 
-  const filteredTodos = todos.filter(FILTERS[filter].test);
+  const filteredTodos = todos
+    .filter(FILTERS[filter].test)
+    .filter((todo) =>
+      todo.title.toLowerCase().includes(search.toLowerCase())
+    );
 
+  const totalPages = Math.ceil(
+    filteredTodos.length / todosPerPage
+  );
+
+  const startIndex = (currentPage - 1) * todosPerPage;
+
+  const paginatedTodos = filteredTodos.slice(
+    startIndex,
+    startIndex + todosPerPage
+  );
   return (
     <div className="layout">
       <Sidebar
@@ -72,17 +93,53 @@ function App() {
       <main className="panel content">
         <header className="content-header">
           <h2>{FILTERS[filter].label}</h2>
+
           <span className="content-count">
-            {filteredTodos.length} {filteredTodos.length === 1 ? "task" : "tasks"}
+            {filteredTodos.length}{" "}
+            {filteredTodos.length === 1 ? "task" : "tasks"}
           </span>
         </header>
+
+        {/* Search */}
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Search todos..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        {/* Todos per page */}
+        <div className="pagination-controls">
+          <label>
+            Todos per page:{" "}
+            <select
+              value={todosPerPage}
+              onChange={(e) => {
+                setTodosPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={30}>30</option>
+              <option value={40}>40</option>
+              <option value={50}>50</option>
+            </select>
+          </label>
+        </div>
 
         <TodoForm onAdd={handleAdd} />
 
         {error && (
           <div className="error" role="alert">
             <span>{error}</span>
-            <button onClick={() => setError("")} aria-label="Dismiss">
+            <button
+              onClick={() => setError("")}
+              aria-label="Dismiss"
+            >
               ×
             </button>
           </div>
@@ -100,16 +157,39 @@ function App() {
             </p>
           </div>
         ) : (
-          <ul className="todo-list">
-            {filteredTodos.map((todo) => (
-              <TodoItem
-                key={todo._id}
-                todo={todo}
-                onUpdate={handleUpdate}
-                onDelete={handleDelete}
-              />
-            ))}
-          </ul>
+          <>
+            <ul className="todo-list">
+              {paginatedTodos.map((todo) => (
+                <TodoItem
+                  key={todo._id}
+                  todo={todo}
+                  onUpdate={handleUpdate}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </ul>
+
+            {/* Pagination */}
+            <div className="pagination">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                Previous
+              </button>
+
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                Next
+              </button>
+            </div>
+          </>
         )}
       </main>
     </div>
