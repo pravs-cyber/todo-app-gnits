@@ -81,6 +81,13 @@ function App() {
     startIndex,
     startIndex + todosPerPage
   );
+  useEffect(() => {
+    const totalPages = Math.ceil(filteredTodos.length / todosPerPage);
+
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [filteredTodos.length, todosPerPage, currentPage]);
   return (
     <div className="layout">
       <Sidebar
@@ -108,27 +115,6 @@ function App() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-        </div>
-
-        {/* Todos per page */}
-        <div className="pagination-controls">
-          <label>
-            Todos per page:{" "}
-            <select
-              value={todosPerPage}
-              onChange={(e) => {
-                setTodosPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={30}>30</option>
-              <option value={40}>40</option>
-              <option value={50}>50</option>
-            </select>
-          </label>
         </div>
 
         <TodoForm onAdd={handleAdd} />
