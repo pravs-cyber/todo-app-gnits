@@ -172,10 +172,12 @@ function App() {
             {/* Pagination */}
             <div className="pagination">
               <button
+                className="page-arrow"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((p) => p - 1)}
+                aria-label="Previous page"
               >
-                Previous
+                ←
               </button>
 
               <span>
@@ -183,11 +185,31 @@ function App() {
               </span>
 
               <button
+                className="page-arrow"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((p) => p + 1)}
+                aria-label="Next page"
               >
-                Next
+                →
               </button>
+
+              <label className="todos-per-page">
+                Todos per page:
+                <select
+                  value={todosPerPage}
+                  onChange={(e) => {
+                    setTodosPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={30}>30</option>
+                  <option value={40}>40</option>
+                  <option value={50}>50</option>
+                </select>
+              </label>
             </div>
           </>
         )}

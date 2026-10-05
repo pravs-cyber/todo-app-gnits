@@ -515,3 +515,37 @@ h2 {
     font-size: 22px;
   }
 }
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 12px 0;
+}
+
+.page-arrow {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.page-arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.todos-per-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 20px;
+}
+
+.todos-per-page select {
+  padding: 6px 10px;
+  border-radius: 6px;
+}
